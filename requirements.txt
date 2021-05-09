@@ -1,0 +1,9 @@
+regex
+requests
+gspread
+oauth2client
+asyncio
+datetime
+selenium
+webdriver_manager
+google-cloud
