@@ -159,33 +159,31 @@ def sendEmail(receiver_email, items, searchURLs, ingredientsDict, dangerDict):
 
 #################################################
 
+while True:
+    gc = gspread.service_account(filename='vision_key.json')
+    worksheet = gc.open("Is My Food Safe - TypeForm").sheet1
+    row = len(worksheet.get_all_values())
+    if (worksheet.cell(row, 5).value == ''):
+        try:
+            image_address = worksheet.cell(row, 1).value
+            receiver_email = worksheet.cell(row, 2).value
 
-gc = gspread.service_account(filename='vision_key.json')
-worksheet = gc.open("Is My Food Safe - TypeForm").sheet1
-row = len(worksheet.get_all_values())
+            text = GetImageText(image_address)
+            if DEBUG: print(text)
 
-if (worksheet.cell(row, 5).value == ''):
-    try:
-        image_address = worksheet.cell(row, 1).value
-        receiver_email = worksheet.cell(row, 2).value
+            text = CleanText(text)
+            if DEBUG: print(text)
 
-        text = GetImageText(image_address)
-        if DEBUG: print(text)
+            items = GetItems(text)
+            if DEBUG: print(items)
 
-        text = CleanText(text)
-        if DEBUG: print(text)
+            searchURLs, ingredientsDict, dangerDict = FoodLookup(items)
+            if DEBUG: print(searchURLs)
+            if DEBUG: print(dangerDict)
 
-        items = GetItems(text)
-        if DEBUG: print(items)
-
-        searchURLs, ingredientsDict, dangerDict = FoodLookup(items)
-        if DEBUG: print(searchURLs)
-        if DEBUG: print(dangerDict)
-
-        sendEmail(receiver_email, items, searchURLs, ingredientsDict, dangerDict)
-        worksheet.update_cell(row, 5, 'YES')
-    except Exception as e:
-        #worksheet.update_cell(row, 5, 'ERROR')
-        print(e)
-
-    time.sleep(30)
+            sendEmail(receiver_email, items, searchURLs, ingredientsDict, dangerDict)
+            worksheet.update_cell(row, 5, 'YES')
+        except Exception as e:
+            #worksheet.update_cell(row, 5, 'ERROR')
+            print(e)
+    time.sleep(20)
